@@ -124,3 +124,23 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+.hljs {
+  background: #011627 !important;
+  color: #D9E0EE !important;
+  font-size: 0.75rem;
+}
+.hljs-comment {
+  color: #7F848E !important;
+}
+.hljs-keyword {
+  color: #82AAFF !important;
+}
+.hljs-string {
+  color: #C3E88D !important;
+}
+
+button:focus, .bg-popover{
+  outline: none !important;
+}
