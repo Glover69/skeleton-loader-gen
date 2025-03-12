@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
       return [
         {
           source: '/api/ai/:path*',
-          destination: 'https://central-backend.vercel.app/api/ai/:path*', // Proxy to actual endpoint
+          destination: 'http://localhost:2005/api/ai/:path*', // Proxy to actual endpoint
         },
       ];
     },

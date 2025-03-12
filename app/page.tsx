@@ -1,15 +1,11 @@
 /* eslint-disable */
-
-
 "use client";
 
 import Image from "next/image";
 import CodeEditor from "./components/codeEditor";
 import { useState } from "react";
 import CodeBlock from "./components/codeblock";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import axios from 'axios';
 import {
   Select,
   SelectContent,
@@ -21,22 +17,27 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import MyLottieComponent from "./components/lottieComponent";
+import { Progress } from "@/components/ui/progress"
 
-const extractCode = (response: string): string => {
-  const match = response.match(/```html\n([\s\S]*?)\n```/);
-  return match ? match[1] : "No code found";
-};
 
 export default function Home() {
   const [response, setResponse] = useState("");
-  const [open, setOpen] = useState(false);
+  const [isLoading, setLoading] = useState(false);
   const [value, setValue] = useState("");
 
+
+
   const sendCodeToAPI = async (formattedCode: string) => {
+    setLoading(true);
     const res = await fetch("/api/ai/generate-content", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt: formattedCode, application: "skeleton-loader" }),
+      body: JSON.stringify({
+        prompt: formattedCode,
+        application: "skeleton-loader",
+        framework: value
+      }),
     });
 
     const data = await res.json();
@@ -46,13 +47,16 @@ export default function Home() {
     // Convert JSX-specific attributes to plain HTML attributes.
     // const normalizedCode = extractedCode.replace(/className=/g, "class=");
     setResponse(data.content); // Store response
-    toast.success('Success! 🥳', {
-      description: "Code generated successfully"
-    })
+    toast.success("Success! 🥳", {
+      description: "Code generated successfully",
+    });
+    if (data.content) {
+      setLoading(false);
+    }
   };
 
   return (
-    <main className="flex flex-col items-center justify-center py-12 px-20 gap-12 h-screen bg-white">
+    <main className="flex flex-col items-center justify-center py-12 px-20 xl:px-32 2xl:px-48 gap-12 h-screen bg-white">
       <div className="header flex flex-col items-center gap-2">
         <Image src={"/logo.png"} width={100} height={100} alt="logo" />
 
@@ -69,18 +73,15 @@ export default function Home() {
           <span className="font-normal tracking-tighter">
             What framework are you working with?
           </span>
-          <Select>
+          <Select onValueChange={(val) => setValue(val)}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Framework" />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
                 <SelectLabel>Frameworks</SelectLabel>
-                <SelectItem value="apple">NextJS</SelectItem>
-                <SelectItem value="banana">Angular</SelectItem>
-                <SelectItem value="blueberry">Vue.js</SelectItem>
-                <SelectItem value="grapes">Svelte</SelectItem>
-                {/* <SelectItem value="pineapple">Pineapple</SelectItem> */}
+                <SelectItem value="NextJS">NextJS</SelectItem>
+                <SelectItem value="Angular">Angular</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
@@ -88,8 +89,7 @@ export default function Home() {
       </div>
 
       <div className="grid-section w-full grid grid-cols-2 gap-x-12">
-        <CodeEditor onSubmit={sendCodeToAPI} />
-
+        <CodeEditor onSubmit={sendCodeToAPI} value={value} />
 
         {/* Tab Section for generated code */}
         <Tabs defaultValue="preview" className="w-full h-[30rem]">
@@ -99,7 +99,24 @@ export default function Home() {
           </TabsList>
           <TabsContent className="contents" value="preview">
             <div className="wrapper w-full overflow-scroll grow-0 border border-gray-200 rounded-lg h-full">
-            <div className="w-full" dangerouslySetInnerHTML={{ __html: response }} />
+                {isLoading ? (
+                <div className="flex flex-col items-center justify-center h-full">
+                  <MyLottieComponent />
+                  <span className="font-medium tracking-tighter text-lg">Hang on tight! We're almost there 🚀</span>
+                  <Progress className="w-[40%] mt-2" value={33} />
+
+                </div>
+                ) : response ? (
+                <div
+                  className="w-full"
+                  dangerouslySetInnerHTML={{ __html: response }}
+                />
+                ) : (
+                <div className="flex flex-col items-center justify-center h-full">
+                  <span className="font-medium text-xl tracking-tighter">No code submitted yet.</span>
+                  <span className="text-gray-500 tracking-tight">Submit your code to get started!</span>
+                </div>
+                )}
 
             </div>
           </TabsContent>

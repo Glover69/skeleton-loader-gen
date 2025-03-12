@@ -9,21 +9,16 @@ import CodeMirror, { EditorView } from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
 import { html } from "@codemirror/lang-html";
 import { angular } from "@codemirror/lang-angular";
-import {
-  xcodeDark,
-  xcodeDarkInit,
-  xcodeDarkStyle,
-} from "@uiw/codemirror-theme-xcode";
 import prettier from "prettier/standalone";
 import parserBabel from "prettier/parser-babel";
 import { vscodeDark, vscodeDarkInit } from "@uiw/codemirror-theme-vscode";
-import { vscodeLight, vscodeLightInit } from "@uiw/codemirror-theme-vscode";
 
-export default function CodeEditor({
-  onSubmit,
-}: {
+interface CodeEditorProps {
   onSubmit: (code: string) => void;
-}) {
+  value: string;
+}
+
+export default function CodeEditor({ onSubmit, value }: CodeEditorProps) {
   const [code, setCode] = useState("");
 
   const handleSubmit = () => {
@@ -50,7 +45,12 @@ export default function CodeEditor({
         <span className="font-medium text-lg tracking-tighter">
           Your code goes here
         </span>
-        <Button onClick={handleSubmit} variant="outline">
+        <Button
+          className="tracking-tighter hover:bg-[#02298D] hover:cursor-pointer disabled:opacity-35 disabled:hover:cursor-not-allowed bg-[#02298D] text-white"
+          onClick={handleSubmit}
+          variant="default"
+          disabled={!code || !value} // 'value' is assumed to be received via props or context from the parent component
+        >
           Submit Code
         </Button>
       </div>
